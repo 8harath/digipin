@@ -106,28 +106,6 @@ GET /api/digipin/encode?latitude=12.9716&longitude=77.5946
 
 ```json
 {"digipin":"4P3-JK8-52C9"}
-```
-
-### Decode DIGIPIN to Coordinates
-
-```
-GET /api/digipin/decode?digipin=4P3-JK8-52C9
-```
-
-**Response:**
-
-```json
-{"latitude":"12.971601","longitude":"77.594584"}
-```
-
-### Interactive API Documentation
-
-Access the Swagger UI documentation at:
-
-```
-http://localhost:5000/api-docs
-```
-
 ---
  
 ## 🔧 Contributing
