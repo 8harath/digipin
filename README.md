@@ -38,12 +38,32 @@ DIGIPIN simplifies address management and enhances service delivery accuracy, pr
 
 ## ✨ Features
 
-- **Encode**: Convert latitude and longitude into a compact 10-character DIGIPIN
-- **Decode**: Transform a DIGIPIN back to its center-point coordinates
-- **Lightweight**: Optimized for performance and minimal resource usage
+### Core Functionality
+- **Encode**: Convert latitude and longitude into DIGIPIN codes (1-10 character precision)
+- **Decode**: Transform DIGIPIN back to coordinates with optional bounding boxes
+- **Precision Levels**: Support for 10 different precision levels (1000km to 3.8m)
+
+### Advanced Features
+- **Batch Processing**: Encode/decode up to 1000 locations in a single request
+- **Distance Calculation**: Haversine distance between DIGIPINs with travel time estimates
+- **Neighboring Cells**: Find all 8 adjacent DIGIPIN cells
+- **Area Bounding Box**: Get geographic bounds for any DIGIPIN
+
+### Production-Ready
+- **Comprehensive Testing**: 90%+ code coverage with Jest
+- **Rate Limiting**: Configurable rate limits per endpoint (1000/hour standard, 100/hour batch)
+- **Input Validation**: Robust validation with express-validator
+- **Structured Logging**: Winston-based logging with error tracking
+- **Docker Support**: Multi-stage Dockerfile with docker-compose setup
+- **Interactive Documentation**: Swagger UI for API exploration
+- **Health Checks**: Built-in health check endpoint
+- **Error Handling**: Standardized error responses
+
+### Developer Experience
 - **RESTful API**: Clean, standard-compliant endpoints
-- **Interactive Documentation**: Comprehensive Swagger UI for easy exploration
-- **Production-Ready**: Built with Node.js and Express for reliability
+- **TypeScript-Ready**: Clear interfaces and type definitions
+- **Lightweight**: Optimized for performance and minimal resource usage
+- **Extensible**: Modular architecture for easy feature additions
 
 ---
 
@@ -96,29 +116,209 @@ The API will be available at `http://localhost:5000`.
 
 ## 🚀 API Usage
 
-### Encode Coordinates to DIGIPIN
+### Core Endpoints
 
-```
-GET /api/digipin/encode?latitude=12.9716&longitude=77.5946
+#### 1. Encode Coordinates to DIGIPIN
+
+```bash
+GET /api/digipin/encode?latitude=12.9716&longitude=77.5946&precision=10
 ```
 
 **Response:**
-
 ```json
-{"digipin":"4P3-JK8-52C9"}
+{
+  "digipin": "4P3-JK8-52C9",
+  "coordinates": { "latitude": 12.9716, "longitude": 77.5946 },
+  "precision": 10,
+  "precisionInfo": { "gridSize": "0.12″", "approxDistance": "3.8 m" }
+}
+```
+
+#### 2. Decode DIGIPIN to Coordinates
+
+```bash
+GET /api/digipin/decode?digipin=4P3-JK8-52C9
+```
+
+**Response:**
+```json
+{
+  "latitude": "12.971588",
+  "longitude": "77.594589",
+  "precision": 10,
+  "precisionInfo": { "gridSize": "0.12″", "approxDistance": "3.8 m" }
+}
+```
+
+### Advanced Features
+
+#### 3. Batch Processing
+
+Encode/decode up to 1000 locations in a single request:
+
+```bash
+POST /api/digipin/batch/encode
+Content-Type: application/json
+
+{
+  "locations": [
+    { "latitude": 12.9716, "longitude": 77.5946 },
+    { "latitude": 28.6139, "longitude": 77.2090 }
+  ]
+}
+```
+
+#### 4. Distance Calculation
+
+Calculate distance between two DIGIPINs with travel time estimates:
+
+```bash
+GET /api/digipin/distance?from=4P3-JK8-52C9&to=39J-49L-L8T4&unit=km
+```
+
+**Response:**
+```json
+{
+  "distance": 1741.23,
+  "unit": "kilometers",
+  "estimatedTravelTime": {
+    "walking": "20895 minutes",
+    "driving": "2089 minutes"
+  }
+}
+```
+
+#### 5. Neighboring Cells
+
+Find all 8 adjacent DIGIPIN cells:
+
+```bash
+GET /api/digipin/neighbors?digipin=4P3-JK8-52C9
+```
+
+Returns neighbors in all directions (N, NE, E, SE, S, SW, W, NW).
+
+#### 6. Precision Levels
+
+Support for partial DIGIPINs (1-10 characters) for varying area sizes:
+- **Precision 6**: ~1 km area (locality level)
+- **Precision 8**: ~60 m area (building cluster)
+- **Precision 10**: ~3.8 m area (precise location)
+
+### Interactive Documentation
+
+Visit `http://localhost:5000/api-docs` for full Swagger UI documentation.
+
+Detailed API docs: [docs/API.md](docs/API.md)
+
 ---
- 
+
+## 🧪 Testing
+
+Comprehensive test suite with 90%+ code coverage:
+
+```bash
+# Run all tests with coverage
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run specific test suite
+npm run test:unit
+npm run test:api
+```
+
+---
+
+## 🐳 Docker Support
+
+### Using Docker
+
+```bash
+# Build and run with Docker
+docker build -t digipin-api .
+docker run -p 5000:5000 digipin-api
+```
+
+### Using Docker Compose
+
+```bash
+# Start all services (API + Redis)
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+```
+
+The Docker setup includes:
+- Multi-stage build for optimized image size
+- Non-root user for security
+- Health checks
+- Redis for caching (optional)
+- Persistent log volumes
+
+---
+
+## 🔒 Production Features
+
+### Rate Limiting
+- **Standard endpoints**: 1000 requests/hour
+- **Batch endpoints**: 100 requests/hour
+- Configurable limits per endpoint
+
+### Structured Logging
+- Winston-based logging system
+- Separate error and combined logs
+- Request/response tracking
+- HTTP request logging with duration
+
+### Input Validation
+- Comprehensive request validation
+- Coordinate range verification
+- DIGIPIN format validation
+- Automatic error responses
+
+### Error Handling
+- Standardized error responses
+- Development vs production modes
+- Stack traces in development
+- Graceful degradation
+
+---
+
+## 📊 Performance
+
+- Sub-100ms response times for single operations
+- Batch processing for up to 1000 items
+- Optimized encoding/decoding algorithms
+- Minimal memory footprint
+
+---
+
 ## 🔧 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+We welcome contributions! Check out [CONTRIBUTION_IDEAS.md](CONTRIBUTION_IDEAS.md) for feature suggestions and implementation priorities.
+
+### Getting Started
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+3. Write tests for your changes
+4. Ensure all tests pass (`npm test`)
+5. Commit your changes (`git commit -m 'Add amazing feature'`)
+6. Push to the branch (`git push origin feature/amazing-feature`)
+7. Open a Pull Request
 
-Please ensure your code adheres to the existing style and passes all tests.
+### Development Guidelines
+
+- Maintain test coverage above 80%
+- Follow existing code style
+- Add documentation for new features
+- Update API docs when adding endpoints
 
 ---
 

@@ -4,72 +4,61 @@
  * Released under an open-source license for public use
  *
  * This module contains two main functions:
- *  - getDigiPin(lat, lon): Encodes latitude & longitude into a 10-digit alphanumeric DIGIPIN
+ *  - getDigiPin(lat, lon, precision): Encodes latitude & longitude into a DIGIPIN
  *  - getLatLngFromDigiPin(digiPin): Decodes a DIGIPIN back into its central latitude & longitude
  */
 
-const DIGIPIN_GRID = [
-    ['F', 'C', '9', '8'],
-    ['J', '3', '2', '7'],
-    ['K', '4', '5', '6'],
-    ['L', 'M', 'P', 'T']
-  ];
-  
-  const BOUNDS = {
-    minLat: 2.5,
-    maxLat: 38.5,
-    minLon: 63.5,
-    maxLon: 99.5
-  };
-  
-  function getDigiPin(lat, lon) {
+const { DIGIPIN_GRID, BOUNDS } = require('./utils/constants');
+
+  function getDigiPin(lat, lon, precision = 10) {
     if (lat < BOUNDS.minLat || lat > BOUNDS.maxLat) throw new Error('Latitude out of range');
     if (lon < BOUNDS.minLon || lon > BOUNDS.maxLon) throw new Error('Longitude out of range');
-  
+    if (precision < 1 || precision > 10) throw new Error('Precision must be between 1 and 10');
+
     let minLat = BOUNDS.minLat;
     let maxLat = BOUNDS.maxLat;
     let minLon = BOUNDS.minLon;
     let maxLon = BOUNDS.maxLon;
-  
+
     let digiPin = '';
-  
-    for (let level = 1; level <= 10; level++) {
+
+    for (let level = 1; level <= precision; level++) {
       const latDiv = (maxLat - minLat) / 4;
       const lonDiv = (maxLon - minLon) / 4;
-  
+
       // REVERSED row logic (to match original)
       let row = 3 - Math.floor((lat - minLat) / latDiv);
       let col = Math.floor((lon - minLon) / lonDiv);
-  
+
       row = Math.max(0, Math.min(row, 3));
       col = Math.max(0, Math.min(col, 3));
-  
+
       digiPin += DIGIPIN_GRID[row][col];
-  
-      if (level === 3 || level === 6) digiPin += '-';
-  
+
+      if (precision === 10 && (level === 3 || level === 6)) digiPin += '-';
+
       // Update bounds (reverse logic for row)
       maxLat = minLat + latDiv * (4 - row);
       minLat = minLat + latDiv * (3 - row);
-  
+
       minLon = minLon + lonDiv * col;
       maxLon = minLon + lonDiv;
     }
-  
+
     return digiPin;
   }
   
   
   function getLatLngFromDigiPin(digiPin) {
     const pin = digiPin.replace(/-/g, '');
-    if (pin.length !== 10) throw new Error('Invalid DIGIPIN');
-    
+    if (pin.length < 1 || pin.length > 10) throw new Error('Invalid DIGIPIN');
+
     let minLat = BOUNDS.minLat;
     let maxLat = BOUNDS.maxLat;
     let minLon = BOUNDS.minLon;
     let maxLon = BOUNDS.maxLon;
-  
-    for (let i = 0; i < 10; i++) {
+
+    for (let i = 0; i < pin.length; i++) {
       const char = pin[i];
       let found = false;
       let ri = -1, ci = -1;

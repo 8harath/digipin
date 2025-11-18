@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  digipin-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: digipin-api
+    ports:
+      - "${PORT:-5000}:5000"
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=5000
+    volumes:
+      # Mount logs directory for persistence
+      - ./logs:/app/logs
+    restart: unless-stopped
+    networks:
+      - digipin-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:5000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+  # Redis service (optional - for future caching implementation)
+  redis:
+    image: redis:7-alpine
+    container_name: digipin-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    networks:
+      - digipin-network
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+networks:
+  digipin-network:
+    driver: bridge
+
+volumes:
+  redis-data:
+    driver: local

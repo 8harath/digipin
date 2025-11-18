@@ -12,3 +12,5 @@ yarn-error.log*
 # Editor folders
 .vscode/
 .idea/
+logs/
+coverage/

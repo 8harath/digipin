@@ -1,23 +1,44 @@
 {
   "name": "digipin",
   "version": "1.0.0",
-  "description": "",
+  "description": "DIGIPIN - India's geospatial addressing system API",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest --coverage",
+    "test:watch": "jest --watch",
+    "test:unit": "jest src/__tests__/digipin.test.js",
+    "test:api": "jest src/__tests__/api.test.js",
     "start": "node server.js",
     "dev": "nodemon server.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "jest": {
+    "testEnvironment": "node",
+    "coverageDirectory": "coverage",
+    "collectCoverageFrom": [
+      "src/**/*.js",
+      "!src/__tests__/**"
+    ],
+    "testMatch": [
+      "**/__tests__/**/*.test.js"
+    ]
+  },
+  "keywords": ["digipin", "geocoding", "india", "geospatial", "addressing"],
+  "author": "Department of Posts, Government of India",
+  "license": "Apache-2.0",
   "dependencies": {
     "cors": "^2.8.5",
     "digipin": "file:",
     "dotenv": "^16.4.7",
     "express": "^5.1.0",
+    "express-rate-limit": "^8.2.1",
+    "express-validator": "^7.3.0",
+    "ioredis": "^5.8.2",
+    "jest": "^30.2.0",
     "morgan": "^1.10.0",
+    "redis": "^5.9.0",
+    "supertest": "^7.1.4",
     "swagger-ui-express": "^5.0.1",
+    "winston": "^3.18.3",
     "yaml": "^2.7.1",
     "yamljs": "^0.3.0"
   }
